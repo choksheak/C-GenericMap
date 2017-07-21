@@ -25,7 +25,7 @@ struct strmap_keyvalue_list {
 struct strmap_class {
 
 	// Constructors.
-	struct gmap_map *(*create)();
+	struct gmap_map *(*create)(void);
 	struct gmap_map *(*create1)(struct gmap_config config);
 
 	// Basic operations.
@@ -59,7 +59,7 @@ extern struct strmap_class strmap;
 
 // Constructors.
 
-extern struct gmap_map *strmap_create();
+extern struct gmap_map *strmap_create(void);
 extern struct gmap_map *strmap_create1(struct gmap_config config);
 
 /*******************************************************************************************/

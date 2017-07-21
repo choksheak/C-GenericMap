@@ -25,7 +25,7 @@ struct intmap_keyvalue_list {
 struct intmap_class {
 
 	// Constructors.
-	struct gmap_map *(*create)();
+	struct gmap_map *(*create)(void);
 	struct gmap_map *(*create1)(struct gmap_config config);
 
 	// Basic operations.
@@ -58,7 +58,7 @@ extern struct intmap_class intmap;
 
 // Constructors.
 
-extern struct gmap_map *intmap_create();
+extern struct gmap_map *intmap_create(void);
 extern struct gmap_map *intmap_create1(struct gmap_config config);
 
 /*******************************************************************************************/

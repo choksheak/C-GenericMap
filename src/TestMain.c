@@ -121,7 +121,7 @@ void test_gmap_ordered(bool maintainInsertionOrder) {
 	puts("");
 
 	struct gmap_iterator iter2 = gmap.iterator(map);
-	int lastKey = -1;
+	int32_t lastKey = -1;
 	while (gmap.next(&iter2)) {
 		if (maintainInsertionOrder) {
 			assert(iter2.key.primitive.intValue > lastKey);
@@ -135,7 +135,8 @@ void test_gmap_ordered(bool maintainInsertionOrder) {
 
 	struct gmap_keyvalue_list kvlist2 = gmap.getKeyValueList(map);
 
-	for (int i = 0, lastKey = -1; i < kvlist2.size; i++) {
+	lastKey = -1;
+	for (size_t i = 0; i < kvlist2.size; i++) {
 		struct gmap_keyvalue pair = kvlist2.keyValuePairs[i];
 		if (maintainInsertionOrder) {
 			assert(pair.key.primitive.intValue > lastKey);
@@ -166,7 +167,7 @@ void test_gmap_ordered(bool maintainInsertionOrder) {
 	printf("Done test_gmap_ordered %s\n\n", maintainInsertionOrder ? "true" : "false");
 }
 
-void test_gmap() {
+void test_gmap(void) {
 	test_gmap_ordered(false);
 	test_gmap_ordered(true);
 }
@@ -175,7 +176,7 @@ void print_intmap_keyvalue(int32_t key, int32_t value) {
 	printf("[%i=%i]", key, value);
 }
 
-void test_intmap() {
+void test_intmap(void) {
 	puts("Start test_intmap");
 
 	struct gmap_map *map = intmap.create();
@@ -200,7 +201,7 @@ void test_intmap() {
 
 	printf("KV list: ");
 	struct intmap_keyvalue_list kvlist = intmap.getKeyValueList(map);
-	for (int i = 0; i < kvlist.size; i++) {
+	for (size_t i = 0; i < kvlist.size; i++) {
 		printf("(%i=%i)", kvlist.keyValuePairs[i].key, kvlist.keyValuePairs[i].value);
 	}
 	intmap.freeKeyValueList(kvlist);
@@ -224,7 +225,7 @@ void print_strmap_keyvalue(char *key, char *value) {
 	printf("[%s=%s]", key, value);
 }
 
-void test_strmap() {
+void test_strmap(void) {
 	puts("Start test_strmap");
 
 	struct gmap_map *map = strmap.create();
@@ -249,7 +250,7 @@ void test_strmap() {
 
 	printf("KV list: ");
 	struct strmap_keyvalue_list kvlist = strmap.getKeyValueList(map);
-	for (int i = 0; i < kvlist.size; i++) {
+	for (size_t i = 0; i < kvlist.size; i++) {
 		printf("(%s=%s)", kvlist.keyValuePairs[i].key, kvlist.keyValuePairs[i].value);
 	}
 	strmap.freeKeyValueList(kvlist);

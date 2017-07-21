@@ -42,7 +42,7 @@ struct strmap_class strmap = {
 
 // Constructors.
 
-struct gmap_map *strmap_create() {
+struct gmap_map *strmap_create(void) {
 	struct gmap_config config = { .keyType = NULL, .restrictValueToType = NULL };
 	return strmap_create1(config);
 }

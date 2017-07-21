@@ -7,6 +7,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -311,29 +312,29 @@ void gvalue_fprint(struct gvalue_value value, FILE *stream) {
 		fputs(value.primitive.boolValue == false ? "false" : "true", stream);
 		break;
 	case GVALUE_TYPE_BYTE:
-		fprintf(stream, "%i", value.primitive.byteValue);
+		fprintf(stream, "%" PRIi8 , value.primitive.byteValue);
 		break;
 	case GVALUE_TYPE_SHORT:
-		fprintf(stream, "%i", value.primitive.shortValue);
+		fprintf(stream, "%" PRIi16, value.primitive.shortValue);
 		break;
 	case GVALUE_TYPE_INT:
-		fprintf(stream, "%i", value.primitive.intValue);
+		fprintf(stream, "%" PRIi32, value.primitive.intValue);
 		break;
 	case GVALUE_TYPE_LONG:
-		fprintf(stream, "%li", value.primitive.longValue);
+		fprintf(stream, "%" PRIi64, value.primitive.longValue);
 		break;
 
 	case GVALUE_TYPE_UBYTE:
-		fprintf(stream, "%u", value.primitive.ubyteValue);
+		fprintf(stream, "%" PRIu8, value.primitive.ubyteValue);
 		break;
 	case GVALUE_TYPE_USHORT:
-		fprintf(stream, "%u", value.primitive.ushortValue);
+		fprintf(stream, "%" PRIu16, value.primitive.ushortValue);
 		break;
 	case GVALUE_TYPE_UINT:
-		fprintf(stream, "%u", value.primitive.uintValue);
+		fprintf(stream, "%" PRIu32, value.primitive.uintValue);
 		break;
 	case GVALUE_TYPE_ULONG:
-		fprintf(stream, "%lu", value.primitive.ulongValue);
+		fprintf(stream, "%" PRIu64, value.primitive.ulongValue);
 		break;
 
 	case GVALUE_TYPE_FLOAT:
@@ -436,7 +437,7 @@ bool gvalue_tryGetLong(struct gvalue_value value, int64_t *outLongValue) {
 		*outLongValue = (int64_t) atol(value.primitive.stringValue);
 
 		char buffer[21];
-		sprintf(buffer, "%li", *outLongValue);
+		sprintf(buffer, "%" PRIi64, *outLongValue);
 
 		return strcmp(buffer, value.primitive.stringValue) == 0;
 	case GVALUE_TYPE_WSTRING:
@@ -448,7 +449,7 @@ bool gvalue_tryGetLong(struct gvalue_value value, int64_t *outLongValue) {
 		*outLongValue = (int64_t) wcstol(value.primitive.wstringValue, NULL, 10);
 
 		wchar_t wbuffer[21];
-		swprintf(wbuffer, 21, L"%li", *outLongValue);
+		swprintf(wbuffer, 21, L"%" PRIi64, *outLongValue);
 
 		return wcscmp(wbuffer, value.primitive.wstringValue) == 0;
 
@@ -659,35 +660,35 @@ wchar_t *private_allocWStringToWString(wchar_t *s) {
 }
 
 char *gvalue_getAllocStringValue(struct gvalue_value value) {
-	char buffer[100];
+	char buffer[GVALUE_BUFFER_SIZE];
 
 	switch (value.type->code) {
 	case GVALUE_TYPE_BOOL:
 		return value.primitive.boolValue == false ? private_allocStringToString("false") : private_allocStringToString("true");
 	case GVALUE_TYPE_BYTE:
-		sprintf(buffer, "%i", value.primitive.byteValue);
+		sprintf(buffer, "%" PRIi8, value.primitive.byteValue);
 		break;
 	case GVALUE_TYPE_SHORT:
-		sprintf(buffer, "%i", value.primitive.shortValue);
+		sprintf(buffer, "%" PRIi16, value.primitive.shortValue);
 		break;
 	case GVALUE_TYPE_INT:
-		sprintf(buffer, "%i", value.primitive.intValue);
+		sprintf(buffer, "%" PRIi32, value.primitive.intValue);
 		break;
 	case GVALUE_TYPE_LONG:
-		sprintf(buffer, "%li", value.primitive.longValue);
+		sprintf(buffer, "%" PRIi64, value.primitive.longValue);
 		break;
 
 	case GVALUE_TYPE_UBYTE:
-		sprintf(buffer, "%u", value.primitive.ubyteValue);
+		sprintf(buffer, "%" PRIu8, value.primitive.ubyteValue);
 		break;
 	case GVALUE_TYPE_USHORT:
-		sprintf(buffer, "%u", value.primitive.ushortValue);
+		sprintf(buffer, "%" PRIu16, value.primitive.ushortValue);
 		break;
 	case GVALUE_TYPE_UINT:
-		sprintf(buffer, "%u", value.primitive.uintValue);
+		sprintf(buffer, "%" PRIu32, value.primitive.uintValue);
 		break;
 	case GVALUE_TYPE_ULONG:
-		sprintf(buffer, "%lu", value.primitive.ulongValue);
+		sprintf(buffer, "%" PRIu64, value.primitive.ulongValue);
 		break;
 
 	case GVALUE_TYPE_FLOAT:
@@ -723,47 +724,46 @@ char *gvalue_getAllocStringValue(struct gvalue_value value) {
 }
 
 wchar_t *gvalue_getAllocWStringValue(struct gvalue_value value) {
-	static const size_t BufferSize = 100;
-	wchar_t buffer[BufferSize];
+	wchar_t buffer[GVALUE_BUFFER_SIZE];
 
 	switch (value.type->code) {
 	case GVALUE_TYPE_BOOL:
 		return value.primitive.boolValue == false ? private_allocStringToWString("false") : private_allocStringToWString("true");
 	case GVALUE_TYPE_BYTE:
-		swprintf(buffer, BufferSize, L"%i", value.primitive.byteValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIi8, value.primitive.byteValue);
 		break;
 	case GVALUE_TYPE_SHORT:
-		swprintf(buffer, BufferSize, L"%i", value.primitive.shortValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIi16, value.primitive.shortValue);
 		break;
 	case GVALUE_TYPE_INT:
-		swprintf(buffer, BufferSize, L"%i", value.primitive.intValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIi32, value.primitive.intValue);
 		break;
 	case GVALUE_TYPE_LONG:
-		swprintf(buffer, BufferSize, L"%li", value.primitive.longValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIi64, value.primitive.longValue);
 		break;
 
 	case GVALUE_TYPE_UBYTE:
-		swprintf(buffer, BufferSize, L"%u", value.primitive.ubyteValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIu8, value.primitive.ubyteValue);
 		break;
 	case GVALUE_TYPE_USHORT:
-		swprintf(buffer, BufferSize, L"%u", value.primitive.ushortValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIu16, value.primitive.ushortValue);
 		break;
 	case GVALUE_TYPE_UINT:
-		swprintf(buffer, BufferSize, L"%u", value.primitive.uintValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIu32, value.primitive.uintValue);
 		break;
 	case GVALUE_TYPE_ULONG:
-		swprintf(buffer, BufferSize, L"%lu", value.primitive.ulongValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%" PRIu64, value.primitive.ulongValue);
 		break;
 
 	case GVALUE_TYPE_FLOAT:
-		swprintf(buffer, BufferSize, L"%f", value.primitive.floatValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%f", value.primitive.floatValue);
 		break;
 	case GVALUE_TYPE_DOUBLE:
-		swprintf(buffer, BufferSize, L"%lf", value.primitive.doubleValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%lf", value.primitive.doubleValue);
 		break;
 
 	case GVALUE_TYPE_POINTER:
-		swprintf(buffer, BufferSize, L"%p", value.primitive.pointerValue);
+		swprintf(buffer, GVALUE_BUFFER_SIZE, L"%p", value.primitive.pointerValue);
 		break;
 
 	case GVALUE_TYPE_CHAR:

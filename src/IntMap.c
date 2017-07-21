@@ -41,7 +41,7 @@ struct intmap_class intmap = {
 
 // Constructors.
 
-struct gmap_map *intmap_create() {
+struct gmap_map *intmap_create(void) {
 	struct gmap_config config = { .keyType = NULL, .restrictValueToType = NULL };
 	return intmap_create1(config);
 }
