@@ -26,6 +26,7 @@ if "%1" == "clean" goto :clean
 :print
     echo OUTDIR = %OUTDIR%
     echo TARGET = %TARGET%
+    exit /b 0
 
 :test
     if not exist %OUTDIR%\%TARGET% (
