@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef GENERICMAP_H
 #define GENERICMAP_H
 

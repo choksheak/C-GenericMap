@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef INTMAP_H
 #define INTMAP_H
 

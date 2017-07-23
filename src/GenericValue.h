@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef GENERIC_VALUE_H
 #define GENERIC_VALUE_H
 

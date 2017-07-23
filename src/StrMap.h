@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef STRMAP_H
 #define STRMAP_H
 
