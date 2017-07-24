@@ -37,6 +37,7 @@ struct gmap_class gmap = {
 		.freeKeyValueList = gmap_freeKeyValueList,
 		.each = gmap_each,
 		.print = gmap_print,
+		.fprint = gmap_fprint,
 		.hashDeviation = gmap_hashDeviation,
 
 		// Destructor.

@@ -17,13 +17,26 @@ void print_gmap_keyvalue(struct gvalue_value key, struct gvalue_value value) {
 }
 
 // Note: strdup is not standard C and it actually returns a bad ref when I used the default one in cygwin gcc!
-char *strdup(const char *s) {
+char *my_strdup(const char *s) {
 	size_t len = strlen(s) + 1;
 	char *t = malloc(len);
 	if (t != NULL) {
 		memcpy(t, s, len);
 	}
 	return t;
+}
+
+void test_classIsComplete(void *classPointer, void *lastPointer) {
+	assert(classPointer != NULL);
+	assert(lastPointer != NULL);
+	while (classPointer != lastPointer) {
+		assert(*((void **)classPointer) != NULL);
+		classPointer++;
+	}
+}
+
+void test_gmap_class_complete(void) {
+	test_classIsComplete(&gmap, &(gmap.free));
 }
 
 void test_gmap_ordered(bool maintainInsertionOrder) {
@@ -158,8 +171,8 @@ void test_gmap_ordered(bool maintainInsertionOrder) {
 
 	map = gmap.create1(config3);
 
-	gmap.put1(map, gvalue.getString(strdup("k1")), gvalue.getString(strdup("v1")), true, true);
-	gmap.put1(map, gvalue.getString(strdup("k2")), gvalue.getString(strdup("v2")), true, true);
+	gmap.put1(map, gvalue.getString(my_strdup("k1")), gvalue.getString(my_strdup("v1")), true, true);
+	gmap.put1(map, gvalue.getString(my_strdup("k2")), gvalue.getString(my_strdup("v2")), true, true);
 	gmap.remove(map, gvalue.getString("k1"));
 	gmap.remove(map, gvalue.getString("k2"));
 	gmap.free(map);
@@ -168,6 +181,7 @@ void test_gmap_ordered(bool maintainInsertionOrder) {
 }
 
 void test_gmap(void) {
+	test_gmap_class_complete();
 	test_gmap_ordered(false);
 	test_gmap_ordered(true);
 }
@@ -176,8 +190,14 @@ void print_intmap_keyvalue(int32_t key, int32_t value) {
 	printf("[%i=%i]", key, value);
 }
 
+void test_intmap_class_complete(void) {
+	test_classIsComplete(&intmap, &(intmap.free));
+}
+
 void test_intmap(void) {
 	puts("Start test_intmap");
+
+	test_intmap_class_complete();
 
 	struct intmap_map *map = intmap.create();
 	intmap.put(map, 11, 15);
@@ -225,8 +245,14 @@ void print_strmap_keyvalue(char *key, char *value) {
 	printf("[%s=%s]", key, value);
 }
 
+void test_strmap_class_complete(void) {
+	test_classIsComplete(&strmap, &(strmap.free));
+}
+
 void test_strmap(void) {
 	puts("Start test_strmap");
+
+	test_strmap_class_complete();
 
 	struct strmap_map *map = strmap.create();
 	strmap.put(map, "aa", "ab");
@@ -265,7 +291,7 @@ void test_strmap(void) {
 	assert(strmap.containsKey(map, "bb") == false);
 	strmap.remove(map, "zzz");
 
-	strmap.put1(map, strdup("FreeMe"), strdup("MeToo"), true, true);
+	strmap.put1(map, my_strdup("FreeMe"), my_strdup("MeToo"), true, true);
 
 	strmap.free(map);
 
