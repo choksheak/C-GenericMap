@@ -179,13 +179,13 @@ void print_intmap_keyvalue(int32_t key, int32_t value) {
 void test_intmap(void) {
 	puts("Start test_intmap");
 
-	struct gmap_map *map = intmap.create();
+	struct intmap_map *map = intmap.create();
 	intmap.put(map, 11, 15);
 	intmap.put(map, 22, 44);
 	intmap.put(map, 33, 67);
 	intmap.put(map, 55, 88);
 
-	assert(map->size == 4);
+	assert(map->gmap.size == 4);
 
 	assert(intmap.get(map, 11) == 15);
 	assert(intmap.get(map, 13) == 0);
@@ -228,13 +228,13 @@ void print_strmap_keyvalue(char *key, char *value) {
 void test_strmap(void) {
 	puts("Start test_strmap");
 
-	struct gmap_map *map = strmap.create();
+	struct strmap_map *map = strmap.create();
 	strmap.put(map, "aa", "ab");
 	strmap.put(map, "bb", "de");
 	strmap.put(map, "cc", "fg");
 	strmap.put(map, "ee", "hh");
 
-	assert(map->size == 4);
+	assert(map->gmap.size == 4);
 
 	assert(strcmp(strmap.get(map, "aa"), "ab") == 0);
 	assert(strmap.get(map, "zz") == NULL);

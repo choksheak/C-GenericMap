@@ -22,7 +22,7 @@ struct strmap_class strmap = {
 		.getOrDefault = strmap_getOrDefault,
 		.containsKey = strmap_containsKey,
 		.remove = strmap_remove,
-		.clear = gmap_clear,
+		.clear = strmap_clear,
 
 		// More operations.
 		.iterator = strmap_iterator,
@@ -30,11 +30,12 @@ struct strmap_class strmap = {
 		.getKeyValueList = strmap_getKeyValueList,
 		.freeKeyValueList = strmap_freeKeyValueList,
 		.each = strmap_each,
-		.print = gmap_print,
-		.hashDeviation = gmap_hashDeviation,
+		.print = strmap_print,
+		.fprint = strmap_fprint,
+		.hashDeviation = strmap_hashDeviation,
 
 		// Destructor.
-		.free = gmap_free
+		.free = strmap_free
 
 };
 
@@ -42,12 +43,12 @@ struct strmap_class strmap = {
 
 // Constructors.
 
-struct gmap_map *strmap_create(void) {
+struct strmap_map *strmap_create(void) {
 	struct gmap_config config = { .keyType = NULL, .restrictValueToType = NULL };
 	return strmap_create1(config);
 }
 
-struct gmap_map *strmap_create1(struct gmap_config config) {
+struct strmap_map *strmap_create1(struct gmap_config config) {
 	if (config.keyType == NULL) {
 		config.keyType = gvalue.stringType;
 	}
@@ -64,7 +65,7 @@ struct gmap_map *strmap_create1(struct gmap_config config) {
 		return NULL;
 	}
 
-	return gmap_create1(config);
+	return (struct strmap_map *) gmap_create1(config);
 }
 
 /*******************************************************************************************/
@@ -72,37 +73,41 @@ struct gmap_map *strmap_create1(struct gmap_config config) {
 
 // Basic operations.
 
-bool strmap_put(struct gmap_map *map, char *key, char *value) {
-	return gmap_put(map, gvalue_getString(key), gvalue_getString(value));
+bool strmap_put(struct strmap_map *map, char *key, char *value) {
+	return gmap_put(&(map->gmap), gvalue_getString(key), gvalue_getString(value));
 }
 
-bool strmap_put1(struct gmap_map *map, char *key, char *value, bool freeKeyOnRemove, bool freeValueOnRemove) {
-	return gmap_put1(map, gvalue_getString(key), gvalue_getString(value), freeKeyOnRemove, freeValueOnRemove);
+bool strmap_put1(struct strmap_map *map, char *key, char *value, bool freeKeyOnRemove, bool freeValueOnRemove) {
+	return gmap_put1(&(map->gmap), gvalue_getString(key), gvalue_getString(value), freeKeyOnRemove, freeValueOnRemove);
 }
 
-char *strmap_get(struct gmap_map *map, char *key) {
+char *strmap_get(struct strmap_map *map, char *key) {
 	return strmap_getOrDefault(map, key, 0);
 }
 
-char *strmap_getOrDefault(struct gmap_map *map, char *key, char *defaultValue) {
-	struct gvalue_value *value = gmap_get(map, gvalue_getString(key));
+char *strmap_getOrDefault(struct strmap_map *map, char *key, char *defaultValue) {
+	struct gvalue_value *value = gmap_get(&(map->gmap), gvalue_getString(key));
 	return (value != NULL) ? value->primitive.stringValue : defaultValue;
 }
 
-bool strmap_containsKey(struct gmap_map *map, char *key) {
-	return gmap_containsKey(map, gvalue_getString(key));
+bool strmap_containsKey(struct strmap_map *map, char *key) {
+	return gmap_containsKey(&(map->gmap), gvalue_getString(key));
 }
 
-bool strmap_remove(struct gmap_map *map, char *key) {
-	return gmap_remove(map, gvalue_getString(key));
+bool strmap_remove(struct strmap_map *map, char *key) {
+	return gmap_remove(&(map->gmap), gvalue_getString(key));
+}
+
+void strmap_clear(struct strmap_map *map) {
+	gmap_clear(&(map->gmap));
 }
 
 /*******************************************************************************************/
 
 // More operations.
 
-struct strmap_iterator strmap_iterator(struct gmap_map *map) {
-	struct gmap_iterator gIterator = gmap_iterator(map);
+struct strmap_iterator strmap_iterator(struct strmap_map *map) {
+	struct gmap_iterator gIterator = gmap_iterator(&(map->gmap));
 	struct strmap_iterator iterator = { .iterator = gIterator };
 	return iterator;
 }
@@ -116,13 +121,13 @@ bool strmap_next(struct strmap_iterator *iterator) {
 	return hasNext;
 }
 
-struct strmap_keyvalue_list strmap_getKeyValueList(struct gmap_map *map) {
+struct strmap_keyvalue_list strmap_getKeyValueList(struct strmap_map *map) {
 	struct strmap_keyvalue_list kvlist = {
-			.size = map->size,
-			.keyValuePairs = (map->size == 0) ? NULL : malloc(sizeof(struct strmap_keyvalue) * map->size)
+			.size = map->gmap.size,
+			.keyValuePairs = (map->gmap.size == 0) ? NULL : malloc(sizeof(struct strmap_keyvalue) * map->gmap.size)
 	};
 
-	if (map->size > 0) {
+	if (map->gmap.size > 0) {
 		struct strmap_iterator iterator = strmap_iterator(map);
 		size_t index = 0;
 		while (strmap_next(&iterator)) {
@@ -140,9 +145,29 @@ void strmap_freeKeyValueList(struct strmap_keyvalue_list kvlist) {
 	}
 }
 
-void strmap_each(struct gmap_map *map, void (*func)(char *, char *)) {
+void strmap_each(struct strmap_map *map, void (*func)(char *, char *)) {
 	struct strmap_iterator iter = strmap_iterator(map);
 	while (strmap_next(&iter)) {
 		func(iter.key, iter.value);
 	}
+}
+
+void strmap_print(struct strmap_map* map) {
+	gmap_print(&(map->gmap));
+}
+
+void strmap_fprint(struct strmap_map* map, FILE *stream) {
+	gmap_fprint(&(map->gmap), stream);
+}
+
+float strmap_hashDeviation(struct strmap_map* map) {
+	return gmap_hashDeviation(&(map->gmap));
+}
+
+/*******************************************************************************************/
+
+// Destructor.
+
+void strmap_free(struct strmap_map *map) {
+	gmap_free(&(map->gmap));
 }

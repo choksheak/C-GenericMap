@@ -21,7 +21,7 @@ struct intmap_class intmap = {
 		.getOrDefault = intmap_getOrDefault,
 		.containsKey = intmap_containsKey,
 		.remove = intmap_remove,
-		.clear = gmap_clear,
+		.clear = intmap_clear,
 
 		// More operations.
 		.iterator = intmap_iterator,
@@ -29,11 +29,12 @@ struct intmap_class intmap = {
 		.getKeyValueList = intmap_getKeyValueList,
 		.freeKeyValueList = intmap_freeKeyValueList,
 		.each = intmap_each,
-		.print = gmap_print,
-		.hashDeviation = gmap_hashDeviation,
+		.print = intmap_print,
+		.fprint = intmap_fprint,
+		.hashDeviation = intmap_hashDeviation,
 
 		// Destructor.
-		.free = gmap_free
+		.free = intmap_free
 
 };
 
@@ -41,12 +42,12 @@ struct intmap_class intmap = {
 
 // Constructors.
 
-struct gmap_map *intmap_create(void) {
+struct intmap_map *intmap_create(void) {
 	struct gmap_config config = { .keyType = NULL, .restrictValueToType = NULL };
 	return intmap_create1(config);
 }
 
-struct gmap_map *intmap_create1(struct gmap_config config) {
+struct intmap_map *intmap_create1(struct gmap_config config) {
 	if (config.keyType == NULL) {
 		config.keyType = gvalue.intType;
 	}
@@ -63,7 +64,7 @@ struct gmap_map *intmap_create1(struct gmap_config config) {
 		return NULL;
 	}
 
-	return gmap_create1(config);
+	return (struct intmap_map *) gmap_create1(config);
 }
 
 /*******************************************************************************************/
@@ -71,33 +72,37 @@ struct gmap_map *intmap_create1(struct gmap_config config) {
 
 // Basic operations.
 
-bool intmap_put(struct gmap_map *map, int32_t key, int32_t value) {
-	return gmap_put(map, gvalue_getInt(key), gvalue_getInt(value));
+bool intmap_put(struct intmap_map *map, int32_t key, int32_t value) {
+	return gmap_put(&(map->gmap), gvalue_getInt(key), gvalue_getInt(value));
 }
 
-int32_t intmap_get(struct gmap_map *map, int32_t key) {
+int32_t intmap_get(struct intmap_map *map, int32_t key) {
 	return intmap_getOrDefault(map, key, 0);
 }
 
-int32_t intmap_getOrDefault(struct gmap_map *map, int32_t key, int32_t defaultValue) {
-	struct gvalue_value *value = gmap_get(map, gvalue_getInt(key));
+int32_t intmap_getOrDefault(struct intmap_map *map, int32_t key, int32_t defaultValue) {
+	struct gvalue_value *value = gmap_get(&(map->gmap), gvalue_getInt(key));
 	return (value != NULL) ? value->primitive.intValue : defaultValue;
 }
 
-bool intmap_containsKey(struct gmap_map *map, int32_t key) {
-	return gmap_containsKey(map, gvalue_getInt(key));
+bool intmap_containsKey(struct intmap_map *map, int32_t key) {
+	return gmap_containsKey(&(map->gmap), gvalue_getInt(key));
 }
 
-bool intmap_remove(struct gmap_map *map, int32_t key) {
-	return gmap_remove(map, gvalue_getInt(key));
+bool intmap_remove(struct intmap_map *map, int32_t key) {
+	return gmap_remove(&(map->gmap), gvalue_getInt(key));
+}
+
+void intmap_clear(struct intmap_map *map) {
+	gmap_clear(&(map->gmap));
 }
 
 /*******************************************************************************************/
 
 // More operations.
 
-struct intmap_iterator intmap_iterator(struct gmap_map *map) {
-	struct gmap_iterator gIterator = gmap_iterator(map);
+struct intmap_iterator intmap_iterator(struct intmap_map *map) {
+	struct gmap_iterator gIterator = gmap_iterator(&(map->gmap));
 	struct intmap_iterator iterator = { .iterator = gIterator };
 	return iterator;
 }
@@ -111,13 +116,13 @@ bool intmap_next(struct intmap_iterator *iterator) {
 	return hasNext;
 }
 
-struct intmap_keyvalue_list intmap_getKeyValueList(struct gmap_map *map) {
+struct intmap_keyvalue_list intmap_getKeyValueList(struct intmap_map *map) {
 	struct intmap_keyvalue_list kvlist = {
-			.size = map->size,
-			.keyValuePairs = (map->size == 0) ? NULL : malloc(sizeof(struct intmap_keyvalue) * map->size)
+			.size = map->gmap.size,
+			.keyValuePairs = (map->gmap.size == 0) ? NULL : malloc(sizeof(struct intmap_keyvalue) * map->gmap.size)
 	};
 
-	if (map->size > 0) {
+	if (map->gmap.size > 0) {
 		struct intmap_iterator iterator = intmap_iterator(map);
 		size_t index = 0;
 		while (intmap_next(&iterator)) {
@@ -135,9 +140,29 @@ void intmap_freeKeyValueList(struct intmap_keyvalue_list kvlist) {
 	}
 }
 
-void intmap_each(struct gmap_map *map, void (*func)(int32_t, int32_t)) {
+void intmap_each(struct intmap_map *map, void (*func)(int32_t, int32_t)) {
 	struct intmap_iterator iter = intmap_iterator(map);
 	while (intmap_next(&iter)) {
 		func(iter.key, iter.value);
 	}
+}
+
+void intmap_print(struct intmap_map* map) {
+	gmap_print(&(map->gmap));
+}
+
+void intmap_fprint(struct intmap_map* map, FILE *stream) {
+	gmap_fprint(&(map->gmap), stream);
+}
+
+float intmap_hashDeviation(struct intmap_map* map) {
+	return gmap_hashDeviation(&(map->gmap));
+}
+
+/*******************************************************************************************/
+
+// Destructor.
+
+void intmap_free(struct intmap_map *map) {
+	gmap_free(&(map->gmap));
 }
