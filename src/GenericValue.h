@@ -5,7 +5,6 @@
 #include <float.h>
 #include <stdint.h>
 #include <wchar.h>
-//#include <uchar.h> 	// Should include char16_t and char32_t if your compiler supports it.
 
 #define GVALUE_BUFFER_SIZE 100
 
