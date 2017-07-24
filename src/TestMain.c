@@ -1,3 +1,6 @@
+/**
+ * Test program for GenericMap.
+ */
 
 #include <assert.h>
 #include <stdio.h>

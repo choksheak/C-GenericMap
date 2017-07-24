@@ -1,5 +1,5 @@
 /**
- * Integer to integer map based on GenericMap.
+ * String to string map based on GenericMap.
  */
 
 #include <stdio.h>
