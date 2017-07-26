@@ -7,10 +7,10 @@
 
 // Constants.
 
-#define MAP_DEFAULT_INITIAL_CAPACITY 			4
-#define MAP_DEFAULT_LOAD_FACTOR_OVER_THOUSAND	600
-#define MAP_MIN_LOAD_FACTOR_OVER_THOUSAND	    100
-#define MAP_MAX_LOAD_FACTOR_OVER_THOUSAND	    1000
+#define GMAP_DEFAULT_INITIAL_CAPACITY 			4
+#define GMAP_DEFAULT_LOAD_FACTOR_OVER_THOUSAND	600
+#define GMAP_MIN_LOAD_FACTOR_OVER_THOUSAND	    100
+#define GMAP_MAX_LOAD_FACTOR_OVER_THOUSAND	    1000
 
 /*******************************************************************************************/
 

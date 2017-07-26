@@ -3,6 +3,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 #include "GenericMap.h"
 #include "IntMap.h"
 #include "StrMap.h"
+#include "GenericList.h"
 
 void print_gmap_keyvalue(struct gvalue_value key, struct gvalue_value value) {
 	printf("{");
@@ -301,9 +303,65 @@ void test_strmap(void) {
 	puts("Done test_strmap\n");
 }
 
+void test_glist_print(struct gvalue_value v) {
+	printf("(%" PRIi32 ")", v.primitive.intValue);
+}
+
+void test_glist_class_complete(void) {
+	test_classIsComplete(&glist, &(glist.free));
+}
+
+void test_glist(void) {
+	puts("Start test_glist");
+
+	test_glist_class_complete();
+
+	struct glist_list *list = glist.create(gvalue.intType);
+
+	assert(glist.contains(list, gvalue.getInt(2)) == false);
+	glist.add(list, gvalue.getInt(4));
+	assert(glist.contains(list, gvalue.getInt(4)) == true);
+
+	for (uint32_t i = 1; i < 100; i++) {
+		assert(list->size == i);
+		glist.add(list, gvalue.getInt(i * 3));
+	}
+
+	printf("glist: ");
+	glist.print(list);
+	puts("");
+
+	uint32_t index;
+	assert(glist.tryGetIndex(list, gvalue.getInt(3), &index) == true);
+	assert(index == 1);
+
+	assert(glist.contains(list, gvalue.getInt(42)) == true);
+
+	uint32_t size = list->size;
+	glist.remove(list, gvalue.getInt(30));
+	assert(list->size == size - 1);
+
+	while (list->size > 2) {
+		glist.removeIndex(list, 1);
+	}
+	assert(list->size == 2);
+
+	printf("each: ");
+	glist.each(list, test_glist_print);
+	puts("");
+
+	glist.clear(list);
+	assert(list->size == 0);
+
+	glist.free(list);
+
+	puts("Done test_glist\n");
+}
+
 int main(void) {
 	test_gmap();
 	test_intmap();
 	test_strmap();
+	test_glist();
 	return EXIT_SUCCESS;
 }

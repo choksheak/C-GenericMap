@@ -66,9 +66,9 @@ struct gmap_map *gmap_create1(struct gmap_config config) {
 		config.capacity = 1;
 	}
 
-	if (config.loadFactorOverThousand < MAP_MIN_LOAD_FACTOR_OVER_THOUSAND
-			|| config.loadFactorOverThousand > MAP_MAX_LOAD_FACTOR_OVER_THOUSAND) {
-		config.loadFactorOverThousand = MAP_DEFAULT_LOAD_FACTOR_OVER_THOUSAND;
+	if (config.loadFactorOverThousand < GMAP_MIN_LOAD_FACTOR_OVER_THOUSAND
+			|| config.loadFactorOverThousand > GMAP_MAX_LOAD_FACTOR_OVER_THOUSAND) {
+		config.loadFactorOverThousand = GMAP_DEFAULT_LOAD_FACTOR_OVER_THOUSAND;
 	}
 
 	if (config.hashFunc == NULL) {
@@ -103,7 +103,8 @@ struct gmap_map *gmap_create1(struct gmap_config config) {
 /*******************************************************************************************/
 
 // Internal operations.
-void private_map_grow(struct gmap_map *map) {
+
+void private_gmap_grow(struct gmap_map *map) {
 	uint32_t capacity = map->config.capacity;
 	uint32_t newCapacity = (capacity <= 3) ? 7 : capacity * 2;
 	struct gmap_bucket **newTable = calloc(sizeof(struct gmap_bucket *), newCapacity);
@@ -130,7 +131,7 @@ void private_map_grow(struct gmap_map *map) {
 	map->config.capacity = newCapacity;
 }
 
-void private_freeKeyAndValueIfNeeded(struct gmap_map *map, struct gmap_bucket *node) {
+void private_gmap_freeKeyAndValueIfNeeded(struct gmap_map *map, struct gmap_bucket *node) {
 	if (node->freeKeyOnRemove) {
 		map->config.freeFunc(node->key);
 	}
@@ -144,7 +145,7 @@ void private_freeKeyAndValueIfNeeded(struct gmap_map *map, struct gmap_bucket *n
 
 // Basic operations.
 
-bool private_checkKeyType(struct gvalue_value givenKey, const struct gvalue_type *keyType) {
+bool private_gmap_checkKeyType(struct gvalue_value givenKey, const struct gvalue_type *keyType) {
 	if (givenKey.type != keyType) {
 		printf("Error: gmap: Wrong key type. Expected=%s, Actual=%s\n", keyType->name, givenKey.type->name);
 		return false;
@@ -160,7 +161,7 @@ bool gmap_put(struct gmap_map *map, struct gvalue_value key, struct gvalue_value
 bool gmap_put1(struct gmap_map *map, struct gvalue_value key, struct gvalue_value value,
 		bool freeKeyOnRemove, bool freeValueOnRemove) {
 
-	if (private_checkKeyType(key, map->config.keyType) == false) {
+	if (private_gmap_checkKeyType(key, map->config.keyType) == false) {
 		return false;
 	}
 
@@ -171,7 +172,7 @@ bool gmap_put1(struct gmap_map *map, struct gvalue_value key, struct gvalue_valu
 
 	uint32_t newLoadFactorOverThousand = ((map->size + 1) * 1000) / map->config.capacity;
 	if (newLoadFactorOverThousand >= map->config.loadFactorOverThousand) {
-		private_map_grow(map);
+		private_gmap_grow(map);
 	}
 
 	uint32_t hashCode = map->config.hashFunc(key);
@@ -181,7 +182,7 @@ bool gmap_put1(struct gmap_map *map, struct gvalue_value key, struct gvalue_valu
 	while (*addToNode != NULL) {
 		if (map->config.cmpFunc((*addToNode)->key, key) == 0) {
 
-			private_freeKeyAndValueIfNeeded(map, (*addToNode));
+			private_gmap_freeKeyAndValueIfNeeded(map, (*addToNode));
 
 			(*addToNode)->key = key;
 			(*addToNode)->value = value;
@@ -258,7 +259,7 @@ bool gmap_put1(struct gmap_map *map, struct gvalue_value key, struct gvalue_valu
 
 // Returns NULL if key is not found.
 struct gvalue_value *gmap_get(struct gmap_map *map, struct gvalue_value key) {
-	if (private_checkKeyType(key, map->config.keyType) == false) {
+	if (private_gmap_checkKeyType(key, map->config.keyType) == false) {
 		return NULL;
 	}
 
@@ -291,7 +292,7 @@ bool gmap_containsKey(struct gmap_map *map, struct gvalue_value key) {
 
 // Returns true if key was removed.
 bool gmap_remove(struct gmap_map *map, struct gvalue_value key) {
-	if (private_checkKeyType(key, map->config.keyType) == false) {
+	if (private_gmap_checkKeyType(key, map->config.keyType) == false) {
 		return false;
 	}
 
@@ -336,7 +337,7 @@ bool gmap_remove(struct gmap_map *map, struct gvalue_value key) {
 				}
 			}
 
-			private_freeKeyAndValueIfNeeded(map, removedNode);
+			private_gmap_freeKeyAndValueIfNeeded(map, removedNode);
 			free(removedNode);
 
 			map->size--;
@@ -364,7 +365,7 @@ void gmap_clear(struct gmap_map *map) {
 		do {
 			struct gmap_ordered_bucket *next = b->next;
 
-			private_freeKeyAndValueIfNeeded(map, (struct gmap_bucket *) b);
+			private_gmap_freeKeyAndValueIfNeeded(map, (struct gmap_bucket *) b);
 
 			free(b);
 			b = next;
@@ -390,7 +391,7 @@ void gmap_clear(struct gmap_map *map) {
 		while (bucket != NULL) {
 			struct gmap_bucket *next = bucket->next;
 
-			private_freeKeyAndValueIfNeeded(map, bucket);
+			private_gmap_freeKeyAndValueIfNeeded(map, bucket);
 
 			free(bucket);
 			bucket = next;
