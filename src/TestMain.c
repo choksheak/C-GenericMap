@@ -12,6 +12,7 @@
 #include "IntMap.h"
 #include "StrMap.h"
 #include "GenericList.h"
+#include "GenericSet.h"
 
 void print_gmap_keyvalue(struct gvalue_value key, struct gvalue_value value) {
 	printf("{");
@@ -358,10 +359,71 @@ void test_glist(void) {
 	puts("Done test_glist\n");
 }
 
+void test_gset_print(struct gvalue_value v) {
+	printf("(%" PRIi32 ")", v.primitive.intValue);
+}
+
+void test_gset_class_complete(void) {
+	test_classIsComplete(&gset, &(gset.free));
+}
+
+void test_gset(void) {
+	puts("Start test_gset");
+
+	test_gset_class_complete();
+
+	struct gset_set *set = gset.create(gvalue.intType);
+
+	assert(gset.contains(set, gvalue.getInt(2)) == false);
+	gset.put(set, gvalue.getInt(4));
+	assert(gset.contains(set, gvalue.getInt(4)) == true);
+
+	for (uint32_t i = 1; i < 100; i++) {
+		assert(set->size == i);
+		gset.put(set, gvalue.getInt(i * 3));
+		gset.put(set, gvalue.getInt(i * 3));
+	}
+
+	printf("gset: ");
+	gset.print(set);
+	puts("");
+
+	assert(gset.contains(set, gvalue.getInt(42)) == true);
+
+	uint32_t size = set->size;
+	gset.remove(set, gvalue.getInt(30));
+	assert(set->size == size - 1);
+
+	for (uint32_t i = 3; i < 100; i++) {
+		gset.remove(set, gvalue.getInt(i * 3));
+	}
+	assert(set->size == 3);
+
+	printf("each: ");
+	gset.each(set, test_gset_print);
+	puts("");
+
+	printf("value list: ");
+	struct gset_value_list list = gset.getValueList(set);
+	for (uint32_t i = 0; i < list.size; i++) {
+		printf("[%" PRIi32 "]", list.values[i].primitive.intValue);
+	}
+	gset.freeValueList(list);
+	puts("");
+
+	gset.clear(set);
+	assert(set->size == 0);
+
+	gset.free(set);
+
+	puts("Done test_gset\n");
+}
+
 int main(void) {
 	test_gmap();
 	test_intmap();
 	test_strmap();
 	test_glist();
+	test_gset();
 	return EXIT_SUCCESS;
 }

@@ -412,36 +412,36 @@ void gmap_clear(struct gmap_map *map) {
 
 // Iterators do not allocate any memory and hence are very lightweight.
 struct gmap_iterator gmap_iterator(struct gmap_map *map) {
-	struct gmap_iterator iter;
-	iter.map = map;
-	iter.mapRevision = map->revision;
+	struct gmap_iterator iterator;
+	iterator.map = map;
+	iterator.mapRevision = map->revision;
 
 	if (map->config.maintainInsertionOrder) {
 		struct gmap_ordered_map *m = (struct gmap_ordered_map *) map;
-		iter.currentSlot = -1;
-		iter.nextBucket = (struct gmap_bucket *) (m->firstInsertedBucket);
+		iterator.currentSlot = -1;
+		iterator.nextBucket = (struct gmap_bucket *) (m->firstInsertedBucket);
 	}
 	else {
-		iter.currentSlot = 1;
-		iter.nextBucket = map->table[0];
+		iterator.currentSlot = 1;
+		iterator.nextBucket = map->table[0];
 	}
 
-	return iter;
+	return iterator;
 }
 
 // Returns true if a next key-value is available.
 // If you modify the map during iteration, the program will print an error and return false.
 //
-//   struct gmap_iterator iter = gmap.iterator(map);
-//   while (gmap.next(&iter)) {
-//      struct gvalue_value key = iter.key;
-//      struct gvalue_value value = iter.value;
+//   struct gmap_iterator iterator = gmap.iterator(map);
+//   while (gmap.next(&iterator)) {
+//      struct gvalue_value key = iterator.key;
+//      struct gvalue_value value = iterator.value;
 //   }
 //   // nothing to free after the end of iteration
 //
 bool gmap_next(struct gmap_iterator *iterator) {
 	if (iterator->mapRevision != iterator->map->revision) {
-		puts("Map modified while iterating\n");
+		printf("Error: gmap: Map modified while iterating\n");
 		return false;
 	}
 
@@ -479,8 +479,8 @@ bool gmap_next(struct gmap_iterator *iterator) {
 //   struct gmap_keyvalue_list kvlist = gmap.getKeyValueList(map);
 //   for (int i = 0; i < kvlist.size; i++) {
 //       struct gmap_keyvalue pair = kvlist.keyValuePairs[i];
-//       struct gval key = pair.key;
-//       struct gval value = pair.value;
+//       struct gvalue_value key = pair.key;
+//       struct gvalue_value value = pair.value;
 //   }
 //	 gmap.freeKeyValueList(kvlist);
 //
@@ -528,9 +528,9 @@ void gmap_freeKeyValueList(struct gmap_keyvalue_list kvlist) {
 }
 
 void gmap_each(struct gmap_map *map, void (*func)(struct gvalue_value, struct gvalue_value)) {
-	struct gmap_iterator iter = gmap_iterator(map);
-	while (gmap_next(&iter)) {
-		func(iter.key, iter.value);
+	struct gmap_iterator iterator = gmap_iterator(map);
+	while (gmap_next(&iterator)) {
+		func(iterator.key, iterator.value);
 	}
 }
 
@@ -544,27 +544,24 @@ void gmap_fprint(struct gmap_map *map, FILE *stream) {
 		return;
 	}
 
-	int notFirst = 0;
 	fputs("{ ", stream);
 
-	for (int slot = map->config.capacity - 1; slot >= 0; slot--) {
-		struct gmap_bucket *listNode = map->table[slot];
-		while (listNode != NULL) {
-			if (notFirst) {
-				fputc(' ', stream);
-			}
-			else {
-				notFirst = 1;
-			}
+	struct gmap_iterator iterator = gmap_iterator(map);
+	bool isFirst = true;
 
-			fputc('{', stream);
-			gvalue_fprint(listNode->key, stream);
-			fputc('=', stream);
-			gvalue_fprint(listNode->value, stream);
-			fputc('}', stream);
-
-			listNode = listNode->next;
+	while (gmap_next(&iterator)) {
+		if (isFirst) {
+			isFirst = false;
 		}
+		else {
+			fputs(", ", stream);
+		}
+
+		fputc('{', stream);
+		gvalue_fprint(iterator.key, stream);
+		fputs("=", stream);
+		gvalue_fprint(iterator.value, stream);
+		fputc('}', stream);
 	}
 
 	fputs(" }", stream);
