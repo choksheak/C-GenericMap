@@ -37,7 +37,7 @@ void test_classIsComplete(void *classPointer, void *lastPointer) {
 	assert(lastPointer != NULL);
 	while (classPointer != lastPointer) {
 		assert(*((void **)classPointer) != NULL);
-		classPointer++;
+		classPointer = (&classPointer)[1];
 	}
 }
 
